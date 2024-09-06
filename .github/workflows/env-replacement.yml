@@ -40,7 +40,7 @@ jobs:
 
       - name: Replace Variables
         run: |
-          ./env-replacement/replace ${{ github.event.inputs.env_file_path }} ${{ github.event.inputs.environment }}
+          ./env-replacement/bin/replace ${{ github.event.inputs.env_file_path }} ${{ github.event.inputs.environment }}
 
       - name: Remove directory with script
         if: always()
