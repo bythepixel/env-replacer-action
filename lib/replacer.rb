@@ -18,9 +18,8 @@ class Replacer
     private
 
     def validate_args!(args)
-      return if args.length == 2
-
-      raise ArgumentError, "Usage: ruby replacer.rb <file_path> <environment>"
+      raise ArgumentError, "Usage: ruby replacer.rb <file_path> <environment>" if args.length != 2
+      raise ArgumentError, "File not found: #{args[0]}" unless File.exist?(args[0])
     end
   end
 
@@ -56,15 +55,6 @@ class Replacer
   # Validate that all tokens in the file have a corresponding value
   # @return [Nil]
   def validate!
-    validate_file!
-    validate_tokens!
-  end
-
-  def validate_file!
-    raise ArgumentError, "File not found: #{@file_path}" unless File.exist?(@file_path)
-  end
-
-  def validate_tokens!
     tokens = tokens_needing_replacement
     missing_tokens = tokens.select { |token| get_value(token).nil? }
     return if missing_tokens.empty?
