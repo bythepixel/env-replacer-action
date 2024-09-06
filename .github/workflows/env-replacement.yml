@@ -44,7 +44,6 @@ jobs:
           repository: 'bythepixel/env_replacement'
           token: ${{ secrets.GITHUB_TOKEN }}
           path: 'env-replacement'
-          ref: 'main'
 
       - name: Replace Variables
         run: |
