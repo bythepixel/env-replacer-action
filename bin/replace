@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+require_relative '../lib/replacer'
+
+# Example usage:
+# ruby replacer.rb .env staging '{"STAGING_API_KEY": "1234"}'
+
+Replacer.from_args(ARGV).replace
+
+puts "Replacements completed"
