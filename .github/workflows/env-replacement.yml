@@ -17,7 +17,8 @@ on:
       inherit: true
 
 jobs:
-  - name: Replace Variables in Environment File
+  replace:
+    name: Replace Variables in Environment File
     runs-on: ubuntu-22.04
     steps:
       - name: Load All secrets into ENV
