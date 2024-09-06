@@ -13,7 +13,6 @@ on:
         description: 'The path to the environment file'
       ref:
         type: string
-        optional: true
         default: 'main'
         description: 'The ref of the env-replacement repository to use'
 
