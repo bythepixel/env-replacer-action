@@ -34,7 +34,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: 'bythepixel/env_replacement'
-          token: ${{ secrets.GITHUB_TOKEN }}
           path: 'env-replacement'
           ref: ${{ github.event.inputs.ref }}
 
