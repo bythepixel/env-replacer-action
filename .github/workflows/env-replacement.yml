@@ -11,6 +11,11 @@ on:
         type: string
         required: true
         description: 'The path to the environment file'
+      ref:
+        type: string
+        optional: true
+        default: 'main'
+        description: 'The ref of the env-replacement repository to use'
 
 
 
@@ -32,6 +37,7 @@ jobs:
           repository: 'bythepixel/env_replacement'
           token: ${{ secrets.GITHUB_TOKEN }}
           path: 'env-replacement'
+          ref: ${{ github.event.inputs.ref }}
 
       - name: Replace Variables
         run: |
