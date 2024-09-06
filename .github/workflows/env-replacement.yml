@@ -11,10 +11,8 @@ on:
         type: string
         required: true
         description: 'The path to the environment file'
-    secrets:
-      inherit: true
-    env:
-      inherit: true
+
+
 
 jobs:
   replace_environment_variables:
