@@ -1,10 +1,7 @@
-require "json"
-
-# Replace all given tokens in a file with the corresponding values
+# Replace all given tokens in a file with the corresponding values from the ENV
 # Tokens are in the format {token_name}
-# The values to replace the tokens with are passed in as a JSON string
-# The json string should have keys that match token_name and values that are the replacement value
-# We will first look for an environment specific version of the token, e.g. PRODUCTION_TOKEN_NAME
+# The ENV should have keys that match token_name and values that are the replacement value
+# We will first look for an environment prefixed version of the token, e.g. PRODUCTION_TOKEN_NAME
 # If that is not found, we will look for the non-environment specific version
 # If that is not found, we will raise an error
 class Replacer
@@ -14,24 +11,21 @@ class Replacer
     # Factory to create a new Replacer instance from positional command line arguments
     def from_args(args)
       validate_args!(args)
-      file_path, environment, json_key_values = args
-      key_values = JSON.parse(json_key_values)
-      new(file_path, environment, key_values)
+      file_path, environment = args
+      new(file_path, environment)
     end
 
     private
 
     def validate_args!(args)
-      return if args.length == 3
-
-      raise ArgumentError, "Usage: ruby replacer.rb <file_path> <environment> <key_values_as_json>"
+      raise ArgumentError, "Usage: ruby replacer.rb <file_path> <environment>" if args.length != 2
+      raise ArgumentError, "File not found: #{args[0]}" unless File.exist?(args[0])
     end
   end
 
-  def initialize(file_path, environment, key_values)
+  def initialize(file_path, environment)
     @file_path = file_path
     @environment = environment
-    @key_values = key_values
     validate!
   end
 
@@ -55,21 +49,12 @@ class Replacer
   # @return [String, Nil]
   def get_value(token_to_replace)
     env_specific_token = @environment.upcase + "_" + token_to_replace
-    @key_values[env_specific_token] || @key_values[token_to_replace]
+    ENV[env_specific_token] || ENV[token_to_replace]
   end
 
   # Validate that all tokens in the file have a corresponding value
   # @return [Nil]
   def validate!
-    validate_file!
-    validate_tokens!
-  end
-
-  def validate_file!
-    raise ArgumentError, "File not found: #{@file_path}" unless File.exist?(@file_path)
-  end
-
-  def validate_tokens!
     tokens = tokens_needing_replacement
     missing_tokens = tokens.select { |token| get_value(token).nil? }
     return if missing_tokens.empty?

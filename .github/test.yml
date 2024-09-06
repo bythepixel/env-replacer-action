@@ -1,0 +1,20 @@
+name: Test
+
+on:
+  pull_request:
+
+jobs:
+    test:
+        runs-on: ubuntu-22.04
+        steps:
+          - name: Checkout this repo
+            uses: actions/checkout@v4
+
+          - name: Install dependencies
+            run: bundle install
+
+          - name: Lint
+            run: bundle exec standardrb
+
+          - name: Test
+            run: rake test
