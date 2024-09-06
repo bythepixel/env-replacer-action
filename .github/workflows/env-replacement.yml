@@ -44,9 +44,10 @@ jobs:
             ENVIRONMENT: ${{ inputs.environment }}
             ENV_FILE_PATH: ${{ inputs.env_file_path }}
 
-      - name: Remove directory with script
-        if: always()
-        run: |
-          rm -rf env-replacement
+      - name: Upload final env file
+        uses: actions/upload-artifact@v4
+        with:
+          name: env_file
+          path: ${{ inputs.env_file_path }}
           
 
