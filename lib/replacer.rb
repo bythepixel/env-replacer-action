@@ -4,12 +4,15 @@
 # We will first look for an environment prefixed version of the token, e.g. PRODUCTION_TOKEN_NAME
 # If that is not found, we will look for the non-environment specific version
 # If that is not found, we will raise an error
+
+require "fileutils"
 class Replacer
   class MissingTokensError < StandardError; end
 
   class << self
     # Factory to create a new Replacer instance from positional command line arguments
     def from_args(args)
+      puts "Current Directory: #{FileUtils.pwd}"
       validate_args!(args)
       file_path, environment = args
       new(file_path, environment)
@@ -19,7 +22,7 @@ class Replacer
 
     def validate_args!(args)
       raise ArgumentError, "Usage: ruby replacer.rb <file_path> <environment>" if args.length != 2
-      raise ArgumentError, "File not found: #{args[0]}" unless File.exist?(args[0])
+      raise ArgumentError, "File not found: #{File.expand_path(args[0])}" unless File.exist?(args[0])
     end
   end
 
