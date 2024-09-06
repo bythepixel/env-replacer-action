@@ -11,10 +11,6 @@ on:
         type: string
         required: true
         description: 'The path to the environment file'
-      env_vars:
-        description: List of environment variables to set up, given in env=value format.
-        required: false
-        type: string
 
 
 
@@ -29,14 +25,6 @@ jobs:
           echo "$SECRETS_CONTEXT" | to_envs >> $GITHUB_ENV
         env:
           SECRETS_CONTEXT: ${{ toJson(secrets) }}
-
-      - name: Load Any Extra Environment Variables
-        if: ${{ inputs.env_vars }}
-        run: |
-          for i in "${{ inputs.env_vars }}"
-          do
-            printf "%s\n" $i >> $GITHUB_ENV
-          done
 
       - name: Checkout this repo
         uses: actions/checkout@v4
