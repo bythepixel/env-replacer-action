@@ -3,6 +3,7 @@ require_relative '../lib/replacer'
 
 # Example usage:
 # ruby replacer.rb .env staging
+# Note that we are expecting to find a .env.staging file for this example and will end up creating a new file with the replaced tokens called .env
 
 Replacer.from_args(ARGV).replace
 
