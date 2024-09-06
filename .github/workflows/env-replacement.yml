@@ -17,7 +17,7 @@ on:
       inherit: true
 
 jobs:
-  - name: Replace Variables in Environment File
+  replace_environment_variables:
     runs-on: ubuntu-22.04
     steps:
       - name: Load All secrets into ENV
@@ -31,7 +31,7 @@ jobs:
       - name: Checkout this repo
         uses: actions/checkout@v4
         with:
-          repository: 'bythepixel/env-replacement'
+          repository: 'bythepixel/env_replacement'
           token: ${{ secrets.GITHUB_TOKEN }}
           path: 'env-replacement'
           ref: 'main'
