@@ -1,0 +1,22 @@
+name: Example Workflow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  example-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+      - name: Navigate to example directory
+        run: cd example
+
+      - name: Successful Example
+        uses: ../action # Uses an action in the root directory
+        with:
+          secrets: ${{ toJSON(secrets) }}
+          environment-name: 'staging'
+          env-file-path: '.env.staging'
