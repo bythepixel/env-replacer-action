@@ -8,7 +8,7 @@ require_relative "support/EnvironmentHelper"
 class ReplacerTest < Minitest::Test
   include EnvironmentHelper
   def setup
-    @environment = 'staging'
+    @environment = "staging"
     @file_name = "test_file"
     @file_path = "#{@file_name}.#{@environment}"
     FileUtils.touch(@file_path)
