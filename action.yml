@@ -15,10 +15,6 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - uses: ruby/setup-ruby@v1
-      with:
-        bundler-cache: true
-        working-directory:  $GITHUB_ACTION_PATH
     - name: Load All secrets into ENV
       shell: bash
       run: |
@@ -27,7 +23,6 @@ runs:
         echo "$SECRETS_CONTEXT" | to_envs >> $GITHUB_ENV
       env:
         SECRETS_CONTEXT: ${{ inputs.secrets }}
-
 
     - name: Run replacement
       shell: bash
