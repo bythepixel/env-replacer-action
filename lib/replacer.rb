@@ -19,7 +19,7 @@ class Replacer
     private
 
     def file_path(args)
-      args.join('.')
+      args.join(".")
     end
 
     def validate_args!(args)

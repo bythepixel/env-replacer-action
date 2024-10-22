@@ -1,0 +1,37 @@
+name: 'Environment Variable Replacement'
+description: 'Generate a new environment file with secrets replaced from a template file'
+inputs:
+  secrets:
+    description: 'The json glob of all secrets to use in the replacement '
+    required: true
+    default: '{}'
+  environment-name:
+    description: 'The environment to replace variables for'
+    required: true
+  env-file-path:
+    description: 'The path to the final environment file to generate. It should have a sibling file with the same name but with a .<environment-name> extension. Ex. .env.staging'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true
+    - name: Load All secrets into ENV
+      shell: bash
+      run: |
+        EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+        to_envs() { jq -r "to_entries[] | \"\(.key)<<$EOF\n\(.value)\n$EOF\n\""; }   
+        echo "$SECRETS_CONTEXT" | to_envs >> $GITHUB_ENV
+      env:
+        SECRETS_CONTEXT: ${{ inputs.secrets }}
+
+
+    - name: Run replacement
+      shell: bash
+      run: |
+        ${{ GITHUB_ACTION_PATH }}/bin/replace  $ENV_FILE_PATH $ENVIRONMENT_NAME
+      env:
+        ENV_FILE_PATH: ${{ inputs.env-file-path }}
+        ENVIRONMENT_NAME: ${{ inputs.environment-name }}

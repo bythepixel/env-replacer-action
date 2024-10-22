@@ -8,15 +8,15 @@ require_relative "support/EnvironmentHelper"
 class ReplacerTest < Minitest::Test
   include EnvironmentHelper
   def setup
-    @environment = 'staging'
+    @environment = "staging"
     @file_name = "test_file"
     @file_path = "#{@file_name}.#{@environment}"
     FileUtils.touch(@file_path)
   end
 
   def teardown
-    FileUtils.rm(@file_path)
-    FileUtils.rm(@file_name)
+    FileUtils.rm(@file_path) if File.exist?(@file_path)
+    FileUtils.rm(@file_name) if File.exist?(@file_name)
   end
 
   def test_it_can_be_constructed_from_args
