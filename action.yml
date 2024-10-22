@@ -31,7 +31,7 @@ runs:
     - name: Run replacement
       shell: bash
       run: |
-        ${{ GITHUB_ACTION_PATH }}/bin/replace  $ENV_FILE_PATH $ENVIRONMENT_NAME
+        ${GITHUB_ACTION_PATH}/bin/replace  $ENV_FILE_PATH $ENVIRONMENT_NAME
       env:
         ENV_FILE_PATH: ${{ inputs.env-file-path }}
         ENVIRONMENT_NAME: ${{ inputs.environment-name }}
