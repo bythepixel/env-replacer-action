@@ -20,4 +20,4 @@ jobs:
           env-file-path: 'examples/.env'
 
       - name: Result
-        run: cat example/.env
+        run: cat examples/.env
