@@ -21,3 +21,25 @@ with:
     env-file-path: .env
     secrets: ${{ toJSON(secrets) }}
 ```
+
+
+# Local Development
+
+## Requirements
+- Ruby (asdf is the recommended version manager)
+
+## Setup
+1. Clone the repository
+2. Run `bundle install` to install the required gems
+
+## Running the tests
+```bash
+rake
+```
+
+
+## Linting
+```bash
+bundle exec standardrb --fix
+```
+
