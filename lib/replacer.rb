@@ -37,7 +37,7 @@ class Replacer
   def replace
     content = File.read(@file_path)
     tokens_needing_replacement.each do |token|
-      content.gsub!("{#{token}}", get_value(token))
+      content.gsub!(/(?<!\$)\{#{token}\}/, get_value(token))
     end
     File.write(final_file_path, content)
   end
@@ -50,7 +50,7 @@ class Replacer
 
   def tokens_needing_replacement
     @tokens_needing_replacement ||= File.read(@file_path)
-      .scan(/\{(\w+)\}/).flatten
+      .scan(/(?<!\$)\{(\w+)\}/).flatten
   end
 
   # Get the value to replace the token with, prioritizing an environment specific version

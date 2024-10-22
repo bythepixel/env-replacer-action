@@ -48,6 +48,13 @@ class ReplacerTest < Minitest::Test
     end
   end
 
+  def test_it_ignore_dollar_sign_prefixed_tokens
+    File.write(@file_path, "NAME=Cool\nOTHER_NAME=${NAME}")
+    args = [@file_name, @environment]
+    Replacer.from_args(args).replace
+    assert_equal "NAME=Cool\nOTHER_NAME=${NAME}", File.read(@file_name)
+  end
+
   def test_it_replaces_tokens_in_a_file
     with_environment({"NAME" => "Sean"}) do
       File.write(@file_path, "NAME={NAME}")
@@ -63,6 +70,16 @@ class ReplacerTest < Minitest::Test
       args = [@file_name, @environment]
       Replacer.from_args(args).replace
       assert_equal "NAME=Seanster", File.read(@file_name)
+    end
+  end
+
+  def test_it_does_not_replace_dollar_sign_prefixed_tokens
+    with_environment({"NAME" => "Sean"}) do
+      File.write(@file_path, "NAME={NAME}\nOTHER_NAME=${NAME}")
+      args = [@file_name, @environment]
+      Replacer.from_args(args).replace
+
+      assert_equal "NAME=Sean\nOTHER_NAME=${NAME}", File.read(@file_name)
     end
   end
 end
