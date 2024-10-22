@@ -69,6 +69,6 @@ class Replacer
     missing_tokens = tokens.select { |token| get_value(token).nil? }
     return if missing_tokens.empty?
 
-    raise MissingTokensError, "Missing values for environment #{@environment}! Tokens with no values: #{missing_tokens.join(", ")}"
+    raise MissingTokensError, "Missing values for the #{@environment.upcase} environment! Tokens with no values: #{missing_tokens.join(", ")}"
   end
 end
