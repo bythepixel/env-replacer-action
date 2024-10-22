@@ -17,7 +17,7 @@ jobs:
         with:
           secrets: ${{ toJSON(secrets) }}
           environment-name: 'staging'
-          env-file-path: 'example/.env'
+          env-file-path: 'examples/.env'
 
       - name: Result
         run: cat example/.env
