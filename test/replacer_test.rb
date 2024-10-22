@@ -64,6 +64,15 @@ class ReplacerTest < Minitest::Test
     end
   end
 
+  def test_it_deletes_the_environment_specific_file_after_replacing
+    with_environment({"NAME" => "Sean"}) do
+      File.write(@file_path, "NAME={NAME}")
+      args = [@file_name, @environment]
+      Replacer.from_args(args).replace
+      refute File.exist?(@file_path)
+    end
+  end
+
   def test_it_defaults_to_environment_specific_token
     with_environment({"STAGING_NAME" => "Seanster", "NAME" => "Sean"}) do
       File.write(@file_path, "NAME={NAME}")

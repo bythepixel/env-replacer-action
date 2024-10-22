@@ -40,6 +40,7 @@ class Replacer
       content.gsub!(/(?<!\$)\{#{token}\}/, get_value(token))
     end
     File.write(final_file_path, content)
+    File.delete(@file_path)
   end
 
   private
