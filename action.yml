@@ -18,6 +18,7 @@ runs:
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
+        working-directory:  $GITHUB_ACTION_PATH
     - name: Load All secrets into ENV
       shell: bash
       run: |
