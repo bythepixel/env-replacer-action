@@ -4,7 +4,6 @@ inputs:
   secrets:
     description: 'The json glob of all secrets to use in the replacement '
     required: true
-    default: '{}'
   environment-name:
     description: 'The environment to replace variables for'
     required: true

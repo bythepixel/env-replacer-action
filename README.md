@@ -22,6 +22,11 @@ with:
     secrets: ${{ toJSON(secrets) }}
 ```
 
+## Assumptions
+- This action is written as a "composite" action, meaning it runs on github runner that uses it. 
+- It does not use docker or any other dependencies. It is written in Ruby with no gem dependencies. Github runners come with Ruby pre-installed and we are not using any version specific features.  
+  - The moment you need to use a gem, you will need to update the action to install a specific ruby version and bundle install the gems. 
+- This action will take the input file, replace all the keys with the secrets you pass in, and write to the file you specify. It will delete the original "environment specific" version of the file.
 
 # Local Development
 

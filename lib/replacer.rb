@@ -40,6 +40,7 @@ class Replacer
       content.gsub!(/(?<!\$)\{#{token}\}/, get_value(token))
     end
     File.write(final_file_path, content)
+    File.delete(@file_path)
   end
 
   private
@@ -68,6 +69,6 @@ class Replacer
     missing_tokens = tokens.select { |token| get_value(token).nil? }
     return if missing_tokens.empty?
 
-    raise MissingTokensError, "Missing values for tokens: #{missing_tokens.join(", ")}"
+    raise MissingTokensError, "Missing values for the #{@environment.upcase} environment! Tokens with no values: #{missing_tokens.join(", ")}"
   end
 end

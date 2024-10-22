@@ -1,0 +1,51 @@
+name: Example Workflow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  example-success:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+
+      - name: Example Usage
+        uses: ./ # Uses an action in the root directory
+        with:
+          secrets: ${{ toJSON(secrets) }}
+          environment-name: 'staging'
+          env-file-path: 'examples/.env'
+
+      - name: Result
+        run: cat examples/.env
+
+  example-missing-secret:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+      - name: Example Usage
+        uses: ./ # Uses an action in the root directory
+        with:
+          secrets: ${{ toJSON(secrets) }}
+          environment-name: 'production'
+          env-file-path: 'examples/.env'
+
+  example-missing-env-file:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+      - name: Example Usage
+        uses: ./ # Uses an action in the root directory
+        with:
+          secrets: ${{ toJSON(secrets) }}
+          environment-name: 'missing'
+          env-file-path: 'examples/.env'
