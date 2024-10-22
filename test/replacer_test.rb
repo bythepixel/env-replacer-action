@@ -15,8 +15,8 @@ class ReplacerTest < Minitest::Test
   end
 
   def teardown
-    FileUtils.rm(@file_path)
-    FileUtils.rm(@file_name)
+    FileUtils.rm(@file_path) if File.exist?(@file_path)
+    FileUtils.rm(@file_name) if File.exist?(@file_name)
   end
 
   def test_it_can_be_constructed_from_args

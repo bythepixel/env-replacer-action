@@ -13,6 +13,7 @@ GEM
       racc
     racc (1.7.3)
     rainbow (3.1.1)
+    rake (13.2.1)
     regexp_parser (2.9.1)
     rexml (3.2.6)
     rubocop (1.63.5)
@@ -53,6 +54,7 @@ PLATFORMS
 DEPENDENCIES
   minitest
   mutex_m
+  rake
   standard
 
 BUNDLED WITH
