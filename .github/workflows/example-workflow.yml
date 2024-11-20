@@ -35,7 +35,7 @@ jobs:
           secrets: ${{ toJSON(secrets) }}
           environment-name: 'extra'
           env-file-path: 'examples/.env'
-          additional-variables: '{"ADDITIONAL_VARIABLE": ${{ env.ADDITIONAL_VARIABLE }} }'
+          additional-variables: '{"ADDITIONAL_VARIABLE": "${{ env.ADDITIONAL_VARIABLE }}" }'
         env:
           ADDITIONAL_VARIABLE: 'ADDITIONAL_VALUE'
 
