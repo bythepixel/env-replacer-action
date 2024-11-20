@@ -22,6 +22,22 @@ with:
     secrets: ${{ toJSON(secrets) }}
 ```
 
+If you have additional variables you would like to include that are not secrets but are dynamic, you can pass them in as well using the additional-variables input. 
+```yaml
+name: Replace Environment Secrets
+  - name: Replace Environment Secrets
+    uses: bythepixel/env-replacer-action@1.0.0
+    with:
+      environment-name: staging
+      env-file-path: .env
+      secrets: ${{ toJSON(secrets) }}
+      additional-variables: '{"APP_SHA": "${{ env.sha }}" }'
+```
+
+## Examples
+There is an example workflow [here](https://github.com/bythepixel/env-replacer-action/actions/workflows/example-workflow.yml) that you can run manually in your browser to see the expected output.
+You can cross reference the [examples](./examples) directory as well as the defined [secrets](https://github.com/bythepixel/env-replacer-action/settings/secrets/actions) for this repository to understand how the action works. 
+
 ## Assumptions
 - This action is written as a "composite" action, meaning it runs on github runner that uses it. 
 - It does not use docker or any other dependencies. It is written in Ruby with no gem dependencies. Github runners come with Ruby pre-installed and we are not using any version specific features.  
