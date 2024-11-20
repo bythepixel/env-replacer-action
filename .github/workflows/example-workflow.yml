@@ -22,6 +22,26 @@ jobs:
       - name: Result
         run: cat examples/.env
 
+  example-with-additional-variables:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+      - name: Example Usage
+        uses: ./ # Uses an action in the root directory
+        with:
+          secrets: ${{ toJSON(secrets) }}
+          environment-name: 'extra'
+          env-file-path: 'examples/.env'
+          additional-variables: '{"ADDITIONAL_VARIABLE": ${{ env.ADDITIONAL_VALUE }} }'
+        env:
+          ADDITIONAL_VARIABLE: 'ADDITIONAL_VALUE'
+
+      - name: Result
+        run: cat examples/.env
+  
   example-missing-secret:
     runs-on: ubuntu-22.04
 
