@@ -91,4 +91,19 @@ class ReplacerTest < Minitest::Test
       assert_equal "NAME=Sean\nOTHER_NAME=${NAME}", File.read(@file_name)
     end
   end
+
+  def test_it_supports_hyphenated_environment_names
+    environment = "test-environment"
+    file_path = "#{@file_name}.#{environment}"
+    FileUtils.touch(file_path)
+
+    with_environment({"TEST_ENVIRONMENT_SECRET_1" => "secret_value"}) do
+      File.write(file_path, "SECRET_1={SECRET_1}")
+      args = [@file_name, environment]
+      Replacer.from_args(args).replace
+      assert_equal "SECRET_1=secret_value", File.read(@file_name)
+    end
+  ensure
+    FileUtils.rm(file_path) if File.exist?(file_path)
+  end
 end
