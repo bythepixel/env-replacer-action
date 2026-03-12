@@ -58,7 +58,7 @@ class Replacer
   # @param token_to_replace [String]
   # @return [String, Nil]
   def get_value(token_to_replace)
-    env_specific_token = @environment.upcase + "_" + token_to_replace
+    env_specific_token = normalized_environment + "_" + token_to_replace
     ENV[env_specific_token] || ENV[token_to_replace]
   end
 
@@ -69,6 +69,10 @@ class Replacer
     missing_tokens = tokens.select { |token| get_value(token).nil? }
     return if missing_tokens.empty?
 
-    raise MissingTokensError, "Missing values for the #{@environment.upcase} environment! Tokens with no values: #{missing_tokens.join(", ")}"
+    raise MissingTokensError, "Missing values for the #{normalized_environment} environment! Tokens with no values: #{missing_tokens.join(", ")}"
+  end
+
+  def normalized_environment
+    @environment.upcase.gsub("-", "_")
   end
 end
