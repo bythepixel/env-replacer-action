@@ -31,6 +31,7 @@ class Replacer
   def initialize(file_path, environment)
     @file_path = file_path
     @environment = environment
+    @normalized_environment = environment.upcase.tr("-", "_")
     validate!
   end
 
@@ -72,7 +73,5 @@ class Replacer
     raise MissingTokensError, "Missing values for the #{normalized_environment} environment! Tokens with no values: #{missing_tokens.join(", ")}"
   end
 
-  def normalized_environment
-    @environment.upcase.gsub("-", "_")
-  end
+  attr_reader :normalized_environment
 end
