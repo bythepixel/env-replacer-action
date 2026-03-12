@@ -28,6 +28,8 @@ class Replacer
     end
   end
 
+  attr_reader :normalized_environment
+
   def initialize(file_path, environment)
     @file_path = file_path
     @environment = environment
@@ -72,6 +74,4 @@ class Replacer
 
     raise MissingTokensError, "Missing values for the #{normalized_environment} environment! Tokens with no values: #{missing_tokens.join(", ")}"
   end
-
-  attr_reader :normalized_environment
 end
