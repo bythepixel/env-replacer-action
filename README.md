@@ -16,7 +16,7 @@ It validates the .env file to ensure that we actually have defined a secret for 
 |---|---|---|---|
 | `secrets` | Yes | — | JSON glob of all secrets (`${{ toJSON(secrets) }}`). |
 | `environment-name` | Yes | — | The environment to replace variables for (e.g. `staging`). |
-| `env-file-path` | No* | — | Path to the output file. In convention mode, the action reads a sibling template named `<env-file-path>.<environment-name>` (e.g. `.env.staging`). Required when `template-file-path` is not set. |
+| `env-file-path` | Yes | — | Path to the output file. |
 | `template-file-path` | No* | — | Explicit path to the template file. Use this when the template does not follow the `<output>.<environment>` naming convention (e.g. `appsettings.Production.json`). Required when `env-file-path` is not set. |
 | `delete-template` | No | `true` | Whether to delete the template file after writing the output. Set to `false` to keep it. |
 | `additional-variables` | No | `{}` | JSON object of extra non-secret variables to substitute (e.g. `{"APP_SHA": "abc123"}`). |
