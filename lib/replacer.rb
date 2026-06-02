@@ -4,16 +4,35 @@
 # We will first look for an environment prefixed version of the token, e.g. PRODUCTION_TOKEN_NAME
 # If that is not found, we will look for the non-environment specific version
 # If that is not found, we will raise an error
+#
+# Two ways to point at files:
+#   * Convention (default): a sibling "<output>.<environment>" template is read and
+#     "<output>" is written (the source template is then deleted). This is the
+#     ".env.production -> .env" flow.
+#   * Explicit: pass a template path and an output path directly. When the two are
+#     equal the file is filled in place and not deleted. This supports files whose
+#     name does not follow the "<output>.<environment>" convention, e.g.
+#     ASP.NET Core's appsettings.Production.json.
 
 class Replacer
   class MissingTokensError < StandardError; end
 
   class << self
-    # Factory to create a new Replacer instance from positional command line arguments
+    # Factory from positional command-line args following the sibling convention:
+    #   replace <output_file_path> <environment>   (reads <output_file_path>.<environment>)
     def from_args(args)
       validate_args!(args)
       environment = args[1]
-      new(file_path(args), environment)
+      template    = file_path(args)
+      output      = template.gsub(".#{environment}", "")
+      new(template, environment, output)
+    end
+
+    # Factory with explicit template/output paths (convention-independent).
+    def from_paths(template_path, environment, output_path)
+      raise ArgumentError, "File not found: #{File.expand_path(template_path)}" unless File.exist?(template_path)
+
+      new(template_path, environment, output_path)
     end
 
     private
@@ -30,30 +49,29 @@ class Replacer
 
   attr_reader :normalized_environment
 
-  def initialize(file_path, environment)
-    @file_path = file_path
+  def initialize(template_path, environment, output_path)
+    @template_path = template_path
     @environment = environment
+    @output_path = output_path
     @normalized_environment = environment.upcase.tr("-", "_")
     validate!
   end
 
   def replace
-    content = File.read(@file_path)
+    content = File.read(@template_path)
     tokens_needing_replacement.each do |token|
       content.gsub!(/(?<!\$)\{#{token}\}/, get_value(token))
     end
-    File.write(final_file_path, content)
-    File.delete(@file_path)
+    File.write(@output_path, content)
+    # Only remove the template when it is a distinct sibling; an in-place fill
+    # (output == template) must keep the file it just wrote.
+    File.delete(@template_path) if @output_path != @template_path
   end
 
   private
 
-  def final_file_path
-    @file_path.gsub(".#{@environment}", "")
-  end
-
   def tokens_needing_replacement
-    @tokens_needing_replacement ||= File.read(@file_path)
+    @tokens_needing_replacement ||= File.read(@template_path)
       .scan(/(?<!\$)\{(\w+)\}/).flatten
   end
 

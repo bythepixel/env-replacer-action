@@ -8,8 +8,14 @@ inputs:
     description: 'The environment to replace variables for'
     required: true
   env-file-path:
-    description: 'The path to the final environment file to generate. It should have a sibling file with the same name but with a .<environment-name> extension. Ex. .env.staging'
-    required: true
+    description: 'Convention mode: path to the final environment file to generate. It should have a sibling file with the same name but with a .<environment-name> extension. Ex. .env.staging. Optional when template-file-path is set.'
+    required: false
+  template-file-path:
+    description: 'Explicit mode: literal path to the template file to read. Overrides the <env-file-path>.<environment-name> convention. Use for files that do not follow that naming, e.g. appsettings.Production.json.'
+    required: false
+  output-file-path:
+    description: 'Explicit mode: literal path to write the result to. Defaults to template-file-path (fill in place). When different from the template, the template is deleted after writing (as in convention mode).'
+    required: false
   additional-variables:
     description: 'A json glob of additional variables to use in the replacement'
     required: false
@@ -22,7 +28,7 @@ runs:
       shell: bash
       run: |
         EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
-        to_envs() { jq -r "to_entries[] | \"\(.key)<<$EOF\n\(.value)\n$EOF\n\""; }   
+        to_envs() { jq -r "to_entries[] | \"\(.key)<<$EOF\n\(.value)\n$EOF\n\""; }
         echo "$SECRETS_CONTEXT" | to_envs >> $GITHUB_ENV
       env:
         SECRETS_CONTEXT: ${{ inputs.secrets }}
@@ -31,7 +37,7 @@ runs:
       shell: bash
       run: |
           EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
-          to_envs() { jq -r "to_entries[] | \"\(.key)<<$EOF\n\(.value)\n$EOF\n\""; }   
+          to_envs() { jq -r "to_entries[] | \"\(.key)<<$EOF\n\(.value)\n$EOF\n\""; }
           echo "$ADDITIONAL_VARIABLES" | to_envs >> $GITHUB_ENV
       env:
           ADDITIONAL_VARIABLES: ${{ inputs.additional-variables }}
@@ -39,7 +45,9 @@ runs:
     - name: Run replacement
       shell: bash
       run: |
-        ${GITHUB_ACTION_PATH}/bin/replace  $ENV_FILE_PATH $ENVIRONMENT_NAME
+        ${GITHUB_ACTION_PATH}/bin/replace
       env:
         ENV_FILE_PATH: ${{ inputs.env-file-path }}
         ENVIRONMENT_NAME: ${{ inputs.environment-name }}
+        TEMPLATE_FILE_PATH: ${{ inputs.template-file-path }}
+        OUTPUT_FILE_PATH: ${{ inputs.output-file-path }}
