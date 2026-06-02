@@ -2,29 +2,12 @@
 require "optparse"
 require_relative "../lib/replacer"
 
-# Invocation:
-#   replace <output_file> <environment> [--template <template_file>] [--no-delete-template]
-#
-# Convention mode (no --template):
-#   replace .env staging
-#   Reads .env.staging, writes .env, deletes the template (unless --no-delete-template).
-#
-# Explicit template mode:
-#   replace .env staging --template .env.production
-#   Reads .env.production, writes .env, deletes the template (unless --no-delete-template).
+options = { 
+  environment: ENV.fetch("ENVIRONMENT_NAME"),
+  output_file: ENV.fetch("ENV_FILE_PATH"),
+  template_path: ENV["TEMPLATE_FILE_PATH"],
+  delete_template: ENV.fetch("DELETE_TEMPLATE", "true") == "true"
+}
 
-options = { template_path: nil, delete_template: true }
-OptionParser.new do |opts|
-  opts.on("--template PATH") { |p| options[:template_path] = p }
-  opts.on("--[no-]delete-template") { |v| options[:delete_template] = v }
-end.parse!
 
-output_file, environment = ARGV
-
-if options[:template_path]
-  Replacer.from_paths(options[:template_path], environment, output_file,
-    delete_template: options[:delete_template]).replace
-else
-  Replacer.from_args([output_file, environment],
-    delete_template: options[:delete_template]).replace
-end
+Replacer.from(**options).replace
