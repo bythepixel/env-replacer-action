@@ -7,6 +7,7 @@ require_relative "support/EnvironmentHelper"
 
 class ReplacerTest < Minitest::Test
   include EnvironmentHelper
+
   def setup
     @environment = "staging"
     @file_name = "test_file"
