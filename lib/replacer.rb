@@ -4,35 +4,15 @@
 # We will first look for an environment prefixed version of the token, e.g. PRODUCTION_TOKEN_NAME
 # If that is not found, we will look for the non-environment specific version
 # If that is not found, we will raise an error
-#
-# Two ways to point at files:
-#   * Convention (default): a sibling "<output>.<environment>" template is read and
-#     "<output>" is written. This is the ".env.production -> .env" flow.
-#   * Explicit: pass a template path and an output path directly. Useful for files
-#     whose name does not follow the "<output>.<environment>" convention.
-#
-# In both modes, pass delete_template: false to keep the template file after writing.
-# By default the template is deleted (so e.g. .env.production is not left alongside .env).
 
 class Replacer
   class MissingTokensError < StandardError; end
 
   class << self
-    # Factory from positional command-line args following the sibling convention:
-    #   replace <output_file_path> <environment>   (reads <output_file_path>.<environment>)
-    def from_args(args, delete_template: true)
-      validate_args!(args)
-      environment = args[1]
-      template = file_path(args)
-      output = template.gsub(".#{environment}", "")
-      new(template, environment, output, delete_template: delete_template)
-    end
-
-    # Factory with explicit template/output paths (convention-independent).
-    def from_paths(template_path, environment, output_path, delete_template: true)
-      raise ArgumentError, "File not found: #{File.expand_path(template_path)}" unless File.exist?(template_path)
-
-      new(template_path, environment, output_path, delete_template: delete_template)
+    def from(environment:, output_file:, template_path: nil, delete_template: true)
+      template = template_path || "#{output_file}.#{environment}"
+      fail_unless_file!(template)
+      new(template, environment, output_file, delete_template: delete_template)
     end
 
     private
@@ -41,9 +21,8 @@ class Replacer
       args.join(".")
     end
 
-    def validate_args!(args)
-      raise ArgumentError, "Usage: ruby replacer.rb <file_path> <environment>" if args.length != 2
-      raise ArgumentError, "File not found: #{File.expand_path(file_path(args))}" unless File.exist?(file_path(args))
+    def fail_unless_file!(file_path)
+      raise ArgumentError, "File not found: #{File.expand_path(file_path)}" unless File.exist?(file_path)
     end
   end
 
