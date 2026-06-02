@@ -106,4 +106,45 @@ class ReplacerTest < Minitest::Test
   ensure
     FileUtils.rm(file_path) if File.exist?(file_path)
   end
+
+  def test_from_paths_fills_a_json_file_in_place
+    template = "appsettings.Production.json"
+    File.write(template, %({"ClientId":"{RAMP_CLIENT_ID}"}))
+    with_environment({"RAMP_CLIENT_ID" => "abc123"}) do
+      Replacer.from_paths(template, "production", template).replace
+      assert_equal %({"ClientId":"abc123"}), File.read(template)
+      assert File.exist?(template), "in-place fill must keep the file"
+    end
+  ensure
+    FileUtils.rm(template) if File.exist?(template)
+  end
+
+  def test_from_paths_with_distinct_output_deletes_the_template
+    template = "config.template.json"
+    output = "config.json"
+    File.write(template, %({"name":"{NAME}"}))
+    with_environment({"NAME" => "Sean"}) do
+      Replacer.from_paths(template, "production", output).replace
+      assert_equal %({"name":"Sean"}), File.read(output)
+      refute File.exist?(template), "a distinct output must delete the template"
+    end
+  ensure
+    FileUtils.rm(template) if File.exist?(template)
+    FileUtils.rm(output) if File.exist?(output)
+  end
+
+  def test_from_paths_prefers_environment_specific_token
+    template = "appsettings.Production.json"
+    File.write(template, %({"ClientId":"{RAMP_CLIENT_ID}"}))
+    with_environment({"PRODUCTION_RAMP_CLIENT_ID" => "prod", "RAMP_CLIENT_ID" => "bare"}) do
+      Replacer.from_paths(template, "production", template).replace
+      assert_equal %({"ClientId":"prod"}), File.read(template)
+    end
+  ensure
+    FileUtils.rm(template) if File.exist?(template)
+  end
+
+  def test_from_paths_fails_if_template_missing
+    assert_raises(ArgumentError) { Replacer.from_paths("nope.json", "production", "nope.json") }
+  end
 end

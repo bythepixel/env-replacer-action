@@ -1,8 +1,25 @@
 #!/usr/bin/env ruby
 require_relative '../lib/replacer'
 
-# Example usage:
-# ruby replacer.rb .env staging
-# Note that we are expecting to find a .env.staging file for this example and will end up creating a new file with the replaced tokens called .env
+# Two invocation modes:
+#
+# 1. Convention (sibling template). Positional args, or ENV_FILE_PATH/ENVIRONMENT_NAME:
+#      ruby replacer.rb .env staging
+#    Reads .env.staging, writes .env, deletes the template.
+#
+# 2. Explicit template/output paths (convention-independent). Set TEMPLATE_FILE_PATH
+#    (and optionally OUTPUT_FILE_PATH, defaulting to the template for an in-place fill)
+#    plus ENVIRONMENT_NAME. Used for files like appsettings.Production.json.
 
-Replacer.from_args(ARGV).replace
+template = ENV['TEMPLATE_FILE_PATH']
+
+if template && !template.strip.empty?
+  environment = ENV.fetch('ENVIRONMENT_NAME')
+  output = ENV['OUTPUT_FILE_PATH']
+  output = template if output.nil? || output.strip.empty?
+  Replacer.from_paths(template, environment, output).replace
+else
+  # Fall back to positional args, then to ENV_FILE_PATH/ENVIRONMENT_NAME.
+  args = ARGV.empty? ? [ENV.fetch('ENV_FILE_PATH'), ENV.fetch('ENVIRONMENT_NAME')] : ARGV
+  Replacer.from_args(args).replace
+end
