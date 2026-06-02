@@ -7,12 +7,12 @@
 #
 # Two ways to point at files:
 #   * Convention (default): a sibling "<output>.<environment>" template is read and
-#     "<output>" is written (the source template is then deleted). This is the
-#     ".env.production -> .env" flow.
-#   * Explicit: pass a template path and an output path directly. When the two are
-#     equal the file is filled in place and not deleted. This supports files whose
-#     name does not follow the "<output>.<environment>" convention, e.g.
-#     ASP.NET Core's appsettings.Production.json.
+#     "<output>" is written. This is the ".env.production -> .env" flow.
+#   * Explicit: pass a template path and an output path directly. Useful for files
+#     whose name does not follow the "<output>.<environment>" convention.
+#
+# In both modes, pass delete_template: false to keep the template file after writing.
+# By default the template is deleted (so e.g. .env.production is not left alongside .env).
 
 class Replacer
   class MissingTokensError < StandardError; end
@@ -20,19 +20,19 @@ class Replacer
   class << self
     # Factory from positional command-line args following the sibling convention:
     #   replace <output_file_path> <environment>   (reads <output_file_path>.<environment>)
-    def from_args(args)
+    def from_args(args, delete_template: true)
       validate_args!(args)
       environment = args[1]
       template = file_path(args)
       output = template.gsub(".#{environment}", "")
-      new(template, environment, output)
+      new(template, environment, output, delete_template: delete_template)
     end
 
     # Factory with explicit template/output paths (convention-independent).
-    def from_paths(template_path, environment, output_path)
+    def from_paths(template_path, environment, output_path, delete_template: true)
       raise ArgumentError, "File not found: #{File.expand_path(template_path)}" unless File.exist?(template_path)
 
-      new(template_path, environment, output_path)
+      new(template_path, environment, output_path, delete_template: delete_template)
     end
 
     private
@@ -49,10 +49,11 @@ class Replacer
 
   attr_reader :normalized_environment
 
-  def initialize(template_path, environment, output_path)
+  def initialize(template_path, environment, output_path, delete_template: true)
     @template_path = template_path
     @environment = environment
     @output_path = output_path
+    @delete_template = delete_template
     @normalized_environment = environment.upcase.tr("-", "_")
     validate!
   end
@@ -63,9 +64,7 @@ class Replacer
       content.gsub!(/(?<!\$)\{#{token}\}/, get_value(token))
     end
     File.write(@output_path, content)
-    # Only remove the template when it is a distinct sibling; an in-place fill
-    # (output == template) must keep the file it just wrote.
-    File.delete(@template_path) if @output_path != @template_path
+    File.delete(@template_path) if @delete_template && @output_path != @template_path
   end
 
   private

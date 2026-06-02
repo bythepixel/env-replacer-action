@@ -1,25 +1,30 @@
 #!/usr/bin/env ruby
-require_relative '../lib/replacer'
+require "optparse"
+require_relative "../lib/replacer"
 
-# Two invocation modes:
+# Invocation:
+#   replace <output_file> <environment> [--template <template_file>] [--no-delete-template]
 #
-# 1. Convention (sibling template). Positional args, or ENV_FILE_PATH/ENVIRONMENT_NAME:
-#      ruby replacer.rb .env staging
-#    Reads .env.staging, writes .env, deletes the template.
+# Convention mode (no --template):
+#   replace .env staging
+#   Reads .env.staging, writes .env, deletes the template (unless --no-delete-template).
 #
-# 2. Explicit template/output paths (convention-independent). Set TEMPLATE_FILE_PATH
-#    (and optionally OUTPUT_FILE_PATH, defaulting to the template for an in-place fill)
-#    plus ENVIRONMENT_NAME. Used for files like appsettings.Production.json.
+# Explicit template mode:
+#   replace .env staging --template .env.production
+#   Reads .env.production, writes .env, deletes the template (unless --no-delete-template).
 
-template = ENV['TEMPLATE_FILE_PATH']
+options = { template_path: nil, delete_template: true }
+OptionParser.new do |opts|
+  opts.on("--template PATH") { |p| options[:template_path] = p }
+  opts.on("--[no-]delete-template") { |v| options[:delete_template] = v }
+end.parse!
 
-if template && !template.strip.empty?
-  environment = ENV.fetch('ENVIRONMENT_NAME')
-  output = ENV['OUTPUT_FILE_PATH']
-  output = template if output.nil? || output.strip.empty?
-  Replacer.from_paths(template, environment, output).replace
+output_file, environment = ARGV
+
+if options[:template_path]
+  Replacer.from_paths(options[:template_path], environment, output_file,
+    delete_template: options[:delete_template]).replace
 else
-  # Fall back to positional args, then to ENV_FILE_PATH/ENVIRONMENT_NAME.
-  args = ARGV.empty? ? [ENV.fetch('ENV_FILE_PATH'), ENV.fetch('ENVIRONMENT_NAME')] : ARGV
-  Replacer.from_args(args).replace
+  Replacer.from_args([output_file, environment],
+    delete_template: options[:delete_template]).replace
 end
