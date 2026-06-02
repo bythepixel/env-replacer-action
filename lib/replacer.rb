@@ -23,8 +23,8 @@ class Replacer
     def from_args(args)
       validate_args!(args)
       environment = args[1]
-      template    = file_path(args)
-      output      = template.gsub(".#{environment}", "")
+      template = file_path(args)
+      output = template.gsub(".#{environment}", "")
       new(template, environment, output)
     end
 
