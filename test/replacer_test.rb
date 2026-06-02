@@ -111,7 +111,7 @@ class ReplacerTest < Minitest::Test
     template = "appsettings.Production.json"
     File.write(template, %({"ClientId":"{RAMP_CLIENT_ID}"}))
     with_environment({"RAMP_CLIENT_ID" => "abc123"}) do
-      Replacer.from_paths(template, "production", template).replace
+      Replacer.from_paths(template, "production", template, delete_template: false).replace
       assert_equal %({"ClientId":"abc123"}), File.read(template)
       assert File.exist?(template), "in-place fill must keep the file"
     end
@@ -133,11 +133,34 @@ class ReplacerTest < Minitest::Test
     FileUtils.rm(output) if File.exist?(output)
   end
 
+  def test_from_paths_keeps_template_when_delete_is_false
+    template = "config.template.json"
+    output = "config.json"
+    File.write(template, %({"name":"{NAME}"}))
+    with_environment({"NAME" => "Sean"}) do
+      Replacer.from_paths(template, "production", output, delete_template: false).replace
+      assert_equal %({"name":"Sean"}), File.read(output)
+      assert File.exist?(template), "template must be kept when delete_template is false"
+    end
+  ensure
+    FileUtils.rm(template) if File.exist?(template)
+    FileUtils.rm(output) if File.exist?(output)
+  end
+
+  def test_from_args_keeps_template_when_delete_is_false
+    with_environment({"NAME" => "Sean"}) do
+      File.write(@file_path, "NAME={NAME}")
+      Replacer.from_args([@file_name, @environment], delete_template: false).replace
+      assert_equal "NAME=Sean", File.read(@file_name)
+      assert File.exist?(@file_path), "sibling template must be kept when delete_template is false"
+    end
+  end
+
   def test_from_paths_prefers_environment_specific_token
     template = "appsettings.Production.json"
     File.write(template, %({"ClientId":"{RAMP_CLIENT_ID}"}))
     with_environment({"PRODUCTION_RAMP_CLIENT_ID" => "prod", "RAMP_CLIENT_ID" => "bare"}) do
-      Replacer.from_paths(template, "production", template).replace
+      Replacer.from_paths(template, "production", template, delete_template: false).replace
       assert_equal %({"ClientId":"prod"}), File.read(template)
     end
   ensure

@@ -11,11 +11,12 @@ inputs:
     description: 'Convention mode: path to the final environment file to generate. It should have a sibling file with the same name but with a .<environment-name> extension. Ex. .env.staging. Optional when template-file-path is set.'
     required: false
   template-file-path:
-    description: 'Explicit mode: literal path to the template file to read. Overrides the <env-file-path>.<environment-name> convention. Use for files that do not follow that naming, e.g. appsettings.Production.json.'
+    description: 'Optional explicit path to the template file. Overrides the <env-file-path>.<environment-name> convention. Use for files that do not follow that naming, e.g. appsettings.Production.json.'
     required: false
-  output-file-path:
-    description: 'Explicit mode: literal path to write the result to. Defaults to template-file-path (fill in place). When different from the template, the template is deleted after writing (as in convention mode).'
+  delete-template:
+    description: 'Whether to delete the template file after writing the output. Defaults to true so that e.g. .env.production is not left alongside .env.'
     required: false
+    default: 'true'
   additional-variables:
     description: 'A json glob of additional variables to use in the replacement'
     required: false
@@ -45,9 +46,12 @@ runs:
     - name: Run replacement
       shell: bash
       run: |
-        ${GITHUB_ACTION_PATH}/bin/replace
+        ARGS=("$ENV_FILE_PATH" "$ENVIRONMENT_NAME")
+        [ -n "$TEMPLATE_FILE_PATH" ] && ARGS+=("--template" "$TEMPLATE_FILE_PATH")
+        [ "$DELETE_TEMPLATE" = "false" ] && ARGS+=("--no-delete-template")
+        "${GITHUB_ACTION_PATH}/bin/replace" "${ARGS[@]}"
       env:
         ENV_FILE_PATH: ${{ inputs.env-file-path }}
         ENVIRONMENT_NAME: ${{ inputs.environment-name }}
         TEMPLATE_FILE_PATH: ${{ inputs.template-file-path }}
-        OUTPUT_FILE_PATH: ${{ inputs.output-file-path }}
+        DELETE_TEMPLATE: ${{ inputs.delete-template }}
