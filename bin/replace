@@ -1,8 +1,15 @@
 #!/usr/bin/env ruby
-require_relative '../lib/replacer'
+require "optparse"
+require_relative "../lib/replacer"
 
-# Example usage:
-# ruby replacer.rb .env staging
-# Note that we are expecting to find a .env.staging file for this example and will end up creating a new file with the replaced tokens called .env
+def coerce_empty_string_to_nil(value) = value.empty? ? nil : value
 
-Replacer.from_args(ARGV).replace
+options = { 
+  environment: ENV.fetch("ENVIRONMENT_NAME"),
+  output_file: ENV.fetch("ENV_FILE_PATH"),
+  template_path: coerce_empty_string_to_nil(ENV["TEMPLATE_FILE_PATH"]),
+  delete_template: ENV.fetch("DELETE_TEMPLATE", "true") == "true"
+}
+
+
+Replacer.from(**options).replace

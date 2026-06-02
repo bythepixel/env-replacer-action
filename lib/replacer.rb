@@ -9,11 +9,10 @@ class Replacer
   class MissingTokensError < StandardError; end
 
   class << self
-    # Factory to create a new Replacer instance from positional command line arguments
-    def from_args(args)
-      validate_args!(args)
-      environment = args[1]
-      new(file_path(args), environment)
+    def from(environment:, output_file:, template_path: nil, delete_template: true)
+      template = template_path || "#{output_file}.#{environment}"
+      fail_unless_file!(template)
+      new(template, environment, output_file, delete_template: delete_template)
     end
 
     private
@@ -22,38 +21,35 @@ class Replacer
       args.join(".")
     end
 
-    def validate_args!(args)
-      raise ArgumentError, "Usage: ruby replacer.rb <file_path> <environment>" if args.length != 2
-      raise ArgumentError, "File not found: #{File.expand_path(file_path(args))}" unless File.exist?(file_path(args))
+    def fail_unless_file!(file_path)
+      raise ArgumentError, "File not found: #{File.expand_path(file_path)}" unless File.exist?(file_path)
     end
   end
 
   attr_reader :normalized_environment
 
-  def initialize(file_path, environment)
-    @file_path = file_path
+  def initialize(template_path, environment, output_path, delete_template: true)
+    @template_path = template_path
     @environment = environment
+    @output_path = output_path
+    @delete_template = delete_template
     @normalized_environment = environment.upcase.tr("-", "_")
     validate!
   end
 
   def replace
-    content = File.read(@file_path)
+    content = File.read(@template_path)
     tokens_needing_replacement.each do |token|
       content.gsub!(/(?<!\$)\{#{token}\}/, get_value(token))
     end
-    File.write(final_file_path, content)
-    File.delete(@file_path)
+    File.write(@output_path, content)
+    File.delete(@template_path) if @delete_template && @output_path != @template_path
   end
 
   private
 
-  def final_file_path
-    @file_path.gsub(".#{@environment}", "")
-  end
-
   def tokens_needing_replacement
-    @tokens_needing_replacement ||= File.read(@file_path)
+    @tokens_needing_replacement ||= File.read(@template_path)
       .scan(/(?<!\$)\{(\w+)\}/).flatten
   end
 
