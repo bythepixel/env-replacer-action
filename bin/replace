@@ -2,10 +2,12 @@
 require "optparse"
 require_relative "../lib/replacer"
 
+def coerce_empty_string_to_nil(value) = value.empty? ? nil : value
+
 options = { 
   environment: ENV.fetch("ENVIRONMENT_NAME"),
   output_file: ENV.fetch("ENV_FILE_PATH"),
-  template_path: ENV["TEMPLATE_FILE_PATH"],
+  template_path: coerce_empty_string_to_nil(ENV["TEMPLATE_FILE_PATH"]),
   delete_template: ENV.fetch("DELETE_TEMPLATE", "true") == "true"
 }
 
